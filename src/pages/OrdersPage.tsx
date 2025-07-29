@@ -102,9 +102,11 @@ const OrdersPage: React.FC = () => {
     return true;
   });
 
-  const pedidosFiltrados = activeTab === 'all'
+  const pedidosFiltrados = (activeTab === 'all'
     ? pedidosVisibles
-    : pedidosVisibles.filter((p) => p.estado && p.estado === activeTab);
+    : pedidosVisibles.filter((p) => p.estado && p.estado === activeTab)
+  ).filter((p) => typeof p.id !== 'undefined' && typeof p.total === 'number');
+
   console.log('Pedidos filtrados:', pedidosFiltrados);
   const tabs = tabsPorRol[rol];
 
