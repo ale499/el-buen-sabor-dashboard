@@ -28,6 +28,10 @@ const ProductsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | undefined>();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+
 
   useEffect(() => {
     loadProducts();
@@ -67,7 +71,11 @@ const ProductsPage: React.FC = () => {
     const matchesCategory = !selectedCategory || product.categoria?.denominacion === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   const handleEdit = (product: MenuItem) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
@@ -232,12 +240,19 @@ const ProductsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
+              {paginatedProducts.map((product) => (
+
                 <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{product.denominacion}</div>
-                      <div className="text-sm text-gray-500">{product.descripcion}</div>
+                      <div
+                        className="text-sm text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-xs"
+                        title={product.descripcion}
+                      >
+                        {product.descripcion}
+                      </div>
+
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -297,6 +312,51 @@ const ProductsPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between w-full">
+              <p className="text-sm text-gray-700">
+                Mostrando{' '}
+                <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>{' '}
+                a{' '}
+                <span className="font-medium">
+                  {Math.min(currentPage * itemsPerPage, filteredProducts.length)}
+                </span>{' '}
+                de <span className="font-medium">{filteredProducts.length}</span> resultados
+              </p>
+
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  &laquo;
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === currentPage
+                        ? 'bg-amber-50 border-amber-500 text-amber-600'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  &raquo;
+                </button>
+              </nav>
+            </div>
+          </div>
+
         </div>
       </div>
 
